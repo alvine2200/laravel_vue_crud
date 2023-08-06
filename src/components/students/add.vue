@@ -4,6 +4,12 @@
             <div class="mx-auto">
                 <RouterLink class="btn btn-primary float-end" to="/students">Back</RouterLink>
             </div>
+
+            <ul class="alert alert-warning d-flex flex-wrap text-center" v-if="Object.keys(this.errorList).length > 0">
+                <li class="mb-2 " v-for="(error, index) in this.errorList" :key="index">
+                    {{ error[0] }}
+                </li>
+            </ul>
             <div class="row pt-5">
                 <div class="col-md-12">
                     <form class="group">
@@ -41,11 +47,14 @@
 </template>
 
 <script>
+import axios from 'axios'
+
 export default {
     name: 'add_Students',
     data() {
         return {
             model: {
+                errorList: "",
                 students: {
                     name: '',
                     email: '',
@@ -58,6 +67,7 @@ export default {
     },
     methods: {
         saveStudent() {
+            var mythis=this;
             axios.post('http:127.0.0.1:8000/api/students/create', $this.model.students)
                 .then(res => {
                     if (res.status == 'success') {
@@ -69,6 +79,7 @@ export default {
                             class: '',
                             year: '',
                         }
+                        this.errorList="";
                         alert('Success: Student Added successfully');
                     } else {
                         console.log(res)
@@ -81,7 +92,17 @@ export default {
                         }
                         alert('Error: Someting Went Wrong');
                     }
-                });
+                })
+                .catch(function(error){
+                    if(error.response){
+                        mythis.errorList=error.response.data.errors;
+                        console.log(error.response)
+                    }else if (error.request) {
+                        console.log(error.request)
+                    }else{
+                        console.log(error)
+                    }
+                })
         }
     }
 }
